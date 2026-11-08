@@ -122,6 +122,20 @@ enum Panel: Equatable {
     case none, sharpen
 }
 
+/// Onglets du bas du panneau latéral.
+enum SideTab: String, CaseIterable, Identifiable {
+    case layers, swatches
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .layers: return "Calques"
+        case .swatches: return "Nuancier"
+        }
+    }
+}
+
 enum ExportKind {
     case jpeg, png, activeLayer, eachLayer, clipboard
 }

@@ -253,11 +253,11 @@ final class CanvasView: UIView, UIGestureRecognizerDelegate, UIPencilInteraction
 
     func fitToScreen() {
         guard bounds.width > 0, bounds.height > 0, docSize.width > 0, docSize.height > 0 else { return }
-        let sa = safeAreaInsets
-        let avail = CGRect(x: sa.left + 96,
-                           y: sa.top + 84,
-                           width: bounds.width - sa.left - sa.right - 96 - 32,
-                           height: bounds.height - sa.top - sa.bottom - 84 - 120)
+        // Le canvas n'occupe plus que la zone de travail centrale (barres et panneaux
+        // sont ancrés autour) : une simple marge suffit, plus la place de la barre
+        // d'actions de sélection qui flotte en bas.
+        let bottomExtra: CGFloat = (model.tool == .select && model.panel == .none) ? 64 : 0
+        let avail = bounds.inset(by: UIEdgeInsets(top: 24, left: 24, bottom: 24 + bottomExtra, right: 24))
         guard avail.width > 10, avail.height > 10 else { return }
         let s = min(avail.width / docSize.width, avail.height / docSize.height)
         scale = s
@@ -284,6 +284,20 @@ final class CanvasView: UIView, UIGestureRecognizerDelegate, UIPencilInteraction
         updateSelectionDisplay()
         overlay.setNeedsDisplay()
         CATransaction.commit()
+        publishViewport()
+    }
+
+    /// Informe le modèle du zoom et de la zone visible (navigateur, barre d'état).
+    /// Différé pour ne jamais publier pendant une mise à jour de vue SwiftUI.
+    private func publishViewport() {
+        guard scale > 0 else { return }
+        let visible = CGRect(x: -offset.x / scale, y: -offset.y / scale,
+                             width: bounds.width / scale, height: bounds.height / scale)
+            .intersection(CGRect(origin: .zero, size: docSize))
+        let s = scale
+        DispatchQueue.main.async { [weak self] in
+            self?.model.updateViewport(scale: s, visible: visible)
+        }
     }
 
     private func docPoint(_ v: CGPoint) -> CGPoint {

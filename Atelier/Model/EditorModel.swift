@@ -60,6 +60,11 @@ final class EditorModel: ObservableObject {
     @Published var busyProgress: Double?
     @Published var toast: String?
     @Published var showLayers = true
+    @Published var sideTab: SideTab = .layers
+    @Published var navigatorExpanded = true
+    @Published private(set) var zoomPercent = 100
+    /// Partie visible du document, en coordonnées document (pour le navigateur).
+    @Published private(set) var viewport: CGRect = .zero
     @Published var shareItem: ShareItem?
     @Published private(set) var canUndo = false
     @Published private(set) var canRedo = false
@@ -79,6 +84,14 @@ final class EditorModel: ObservableObject {
     func changed() {
         objectWillChange.send()
         canvas?.setNeedsSync()
+    }
+
+    /// Appelé par le canvas après chaque zoom / déplacement de la vue.
+    func updateViewport(scale: CGFloat, visible: CGRect) {
+        let z = Int((scale * 100).rounded())
+        if z != zoomPercent { zoomPercent = z }
+        let r = visible.isNull ? CGRect.zero : visible.integral
+        if r != viewport { viewport = r }
     }
 
     func showToast(_ text: String) {
