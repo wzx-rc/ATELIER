@@ -216,6 +216,15 @@ struct TopBar: View {
 
             Spacer(minLength: 8)
 
+            // Toujours accessible, quel que soit l'outil, dès qu'une sélection existe.
+            if model.selection != nil || !model.pendingPoints.isEmpty {
+                ActionChip(title: "Désélectionner", icon: "xmark.circle", bordered: true) {
+                    model.pendingPoints = []
+                    model.deselect()
+                }
+                .transition(.opacity)
+            }
+
             HStack(spacing: 2) {
                 IconButton(icon: "arrow.uturn.backward", size: 34, disabled: !model.canUndo) { model.undo() }
                     .accessibilityLabel("Annuler")

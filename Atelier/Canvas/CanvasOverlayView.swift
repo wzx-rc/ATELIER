@@ -138,14 +138,15 @@ final class CanvasOverlayView: UIView {
         }
 
         for (i, sp) in pts.enumerated() {
-            let r: CGFloat = i == 0 ? 8 : 6
+            // Repères discrets (le dessin seulement : la zone de prise au doigt reste large).
+            let r: CGFloat = i == 0 ? 4.5 : 3.5
             let rr = CGRect(x: sp.p.x - r, y: sp.p.y - r, width: 2 * r, height: 2 * r)
-            let shape = sp.smooth ? UIBezierPath(ovalIn: rr) : UIBezierPath(roundedRect: rr, cornerRadius: 2.5)
+            let shape = sp.smooth ? UIBezierPath(ovalIn: rr) : UIBezierPath(roundedRect: rr, cornerRadius: 1)
             let fill = (i == 0 && pts.count >= 3) ? accent : UIColor.white
             fill.setFill()
             shape.fill()
-            UIColor.black.withAlphaComponent(0.75).setStroke()
-            shape.lineWidth = 1.5
+            UIColor.black.withAlphaComponent(0.7).setStroke()
+            shape.lineWidth = 1
             shape.stroke()
         }
         ctx.restoreGState()
